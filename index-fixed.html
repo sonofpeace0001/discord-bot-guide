@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Build & Deploy a Discord Bot with CREAO — Step by Step Guide</title>
+<meta name="description" content="A complete step-by-step guide to building a Discord bot in CREAO, pushing it to GitHub, and deploying it to Railway. Includes a copy-paste prompt template." />
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --paper:#ffffff;
+    --ink:#0a0a0a;
+    --muted:#6b6b6b;
+    --line:#1c1c1c;
+    --line-light:#e6e6e6;
+    --accent:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:#ededed;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* ===== NAV ===== */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,10,10,0.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:1px;font-size:15px;}
+  .brand .dot{width:10px;height:10px;background:#fff;border-radius:2px;}
+  .brand .tag{color:var(--muted);font-weight:500;letter-spacing:2px;font-size:11px;text-transform:uppercase;}
+  .nav-links{display:flex;gap:26px;align-items:center;font-size:13px;color:#cfcfcf;}
+  .nav-links a:hover{color:#fff;}
+  .nav-cta{
+    border:1px solid #fff;color:#fff;padding:8px 16px;border-radius:6px;font-weight:600;font-size:12px;letter-spacing:.5px;
+    transition:all .2s ease;
+  }
+  .nav-cta:hover{background:#fff;color:#000;}
+
+  /* ===== HERO ===== */
+  .hero{position:relative;padding:120px 0 90px;border-bottom:1px solid var(--line);overflow:hidden;}
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background-image:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.08),transparent 55%);
+    pointer-events:none;
+  }
+  .hero .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9a9a9a;
+    border:1px solid var(--line);padding:6px 14px;border-radius:999px;margin-bottom:28px;
+  }
+  .hero .eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:pulse 2.2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6);}70%{box-shadow:0 0 0 10px rgba(255,255,255,0);}100%{box-shadow:0 0 0 0 rgba(255,255,255,0);}}
+  .hero h1{
+    font-size:clamp(34px,6vw,68px);
+    line-height:1.04;font-weight:800;letter-spacing:-1.5px;max-width:900px;
+  }
+  .hero h1 .mono{
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+    background:#fff;color:#000;padding:0 10px;border-radius:6px;font-size:.82em;letter-spacing:-1px;
+    white-space:nowrap;
+  }
+  .hero p.sub{margin-top:26px;font-size:18px;color:#b8b8b8;max-width:640px;}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:38px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:14px 26px;border-radius:8px;font-weight:700;font-size:14px;letter-spacing:.3px;
+    transition:transform .15s ease,background .2s ease,color .2s ease;cursor:pointer;border:none;
+  }
+  .btn-primary{background:#fff;color:#000;}
+  .btn-primary:hover{transform:translateY(-2px);background:#e6e6e6;}
+  .btn-ghost{background:transparent;color:#fff;border:1px solid #3a3a3a;}
+  .btn-ghost:hover{border-color:#fff;transform:translateY(-2px);}
+  .hero-meta{margin-top:42px;display:flex;gap:34px;flex-wrap:wrap;color:#8a8a8a;font-size:13px;}
+  .hero-meta span{display:flex;align-items:center;gap:8px;}
+  .hero-meta svg{width:15px;height:15px;stroke:#fff;}
+
+  /* ===== SECTIONS ===== */
+  section{padding:90px 0;border-bottom:1px solid var(--line);}
+  .section-head{margin-bottom:54px;}
+  .section-num{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#7a7a7a;letter-spacing:2px;}
+  .section-head h2{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;margin-top:10px;}
+  .section-head p{color:#9a9a9a;margin-top:14px;max-width:640px;font-size:16px;}
+
+  /* ===== OVERVIEW TIMELINE ===== */
+  .overview-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .ov-card{border:1px solid var(--line);border-radius:12px;padding:24px 20px;background:#0f0f0f;transition:border-color .2s ease,transform .2s ease;}
+  .ov-card:hover{border-color:#fff;transform:translateY(-3px);}
+  .ov-card .n{font-family:"SF Mono",monospace;font-size:11px;color:#7a7a7a;letter-spacing:2px;}
+  .ov-card h3{font-size:16px;margin-top:12px;font-weight:700;}
+  .ov-card p{font-size:13px;color:#8a8a8a;margin-top:8px;line-height:1.5;}
+
+  /* ===== STEPS ===== */
+  .step{display:grid;grid-template-columns:120px 1fr;gap:30px;padding:48px 0;border-top:1px solid var(--line);}
+  .step:first-of-type{border-top:none;}
+  .step-label{position:sticky;top:90px;align-self:start;}
+  .step-label .big{font-size:54px;font-weight:800;line-height:1;color:#fff;font-family:"SF Mono",monospace;letter-spacing:-2px;}
+  .step-label .tag{font-size:11px;letter-spacing:2px;color:#7a7a7a;text-transform:uppercase;margin-top:10px;}
+  .step-body h3{font-size:26px;font-weight:800;letter-spacing:-.5px;}
+  .step-body p{color:#bcbcbc;margin-top:14px;font-size:16px;max-width:680px;}
+  .step-body .note{
+    margin-top:18px;border-left:2px solid #fff;padding:12px 18px;background:#141414;border-radius:0 8px 8px 0;font-size:14px;color:#cfcfcf;
+  }
+  .step-body .note b{color:#fff;}
+
+  .list{margin-top:18px;display:flex;flex-direction:column;gap:12px;}
+  .list .li{display:flex;gap:14px;font-size:15px;color:#c4c4c4;}
+  .list .li .chk{flex:none;width:22px;height:22px;border:1px solid #3a3a3a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+  .list .li b{color:#fff;font-weight:600;}
+
+  /* code block */
+  pre.code{
+    margin-top:18px;background:#000;border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;overflow-x:auto;position:relative;
+  }
+  pre.code code{
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:#e6e6e6;line-height:1.7;white-space:pre;
+  }
+  .copy-btn{
+    position:absolute;top:10px;right:10px;
+    background:#1c1c1c;color:#cfcfcf;border:1px solid #333;border-radius:6px;
+    font-size:11px;padding:5px 10px;cursor:pointer;letter-spacing:.5px;transition:all .15s ease;
+  }
+  .copy-btn:hover{background:#fff;color:#000;border-color:#fff;}
+  .copy-btn.copied{background:#fff;color:#000;}
+
+  .inline-code{font-family:"SF Mono",monospace;background:#161616;padding:2px 7px;border-radius:5px;font-size:13px;color:#fff;border:1px solid var(--line);}
+
+  /* callout CTA strip */
+  .cta-strip{
+    margin-top:30px;border:1px dashed #3a3a3a;border-radius:12px;padding:24px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;background:#0f0f0f;
+  }
+  .cta-strip p{color:#cfcfcf;font-size:15px;}
+  .cta-strip p b{color:#fff;}
+
+  /* ===== PROMPT TEMPLATE ===== */
+  .prompt-wrap{margin-top:10px;}
+  .prompt-card{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000;
+  }
+  .prompt-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;border-bottom:1px solid var(--line);background:#0f0f0f;
+  }
+  .prompt-head .label{display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:1.5px;color:#9a9a9a;text-transform:uppercase;}
+  .prompt-head .label .dots{display:flex;gap:5px;}
+  .prompt-head .label .dots i{width:8px;height:8px;border-radius:50%;background:#3a3a3a;display:block;}
+  .prompt-body{padding:22px 24px;max-height:430px;overflow:auto;}
+  .prompt-body pre{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.75;color:#dcdcdc;white-space:pre-wrap;}
+
+  .prompt-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;}
+
+  /* ===== FAQ ===== */
+  .faq{display:flex;flex-direction:column;gap:14px;max-width:760px;}
+  details.faq-item{border:1px solid var(--line);border-radius:10px;background:#0f0f0f;overflow:hidden;}
+  details.faq-item summary{padding:18px 22px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  details.faq-item summary::-webkit-details-marker{display:none;}
+  details.faq-item summary .plus{font-size:20px;color:#fff;font-weight:300;transition:transform .2s ease;}
+  details.faq-item[open] summary .plus{transform:rotate(45deg);}
+  details.faq-item .ans{padding:0 22px 18px;color:#a8a8a8;font-size:14.5px;}
+
+  /* ===== FINAL CTA ===== */
+  .final-cta{text-align:center;padding:120px 0;border-bottom:none;}
+  .final-cta h2{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1px;}
+  .final-cta p{color:#9a9a9a;margin:20px auto 0;max-width:560px;font-size:17px;}
+  .final-cta .btn{margin-top:34px;font-size:16px;padding:18px 34px;}
+
+  /* ===== FOOTER ===== */
+  footer{padding:50px 0 40px;border-top:1px solid var(--line);}
+  .foot-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;color:#7a7a7a;font-size:13px;}
+  .foot-inner a{color:#cfcfcf;}
+  .foot-inner a:hover{color:#fff;text-decoration:underline;}
+
+  /* ===== TOAST ===== */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:#fff;color:#000;padding:12px 22px;border-radius:8px;font-weight:600;font-size:13px;
+    opacity:0;pointer-events:none;transition:all .25s ease;z-index:100;letter-spacing:.3px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:860px){
+    .step{grid-template-columns:1fr;gap:14px;}
+    .step-label{position:static;display:flex;align-items:baseline;gap:14px;}
+    .step-label .big{font-size:38px;}
+    .step-label .tag{margin-top:0;}
+    .overview-grid{grid-template-columns:repeat(2,1fr);}
+    .nav-links{display:none;}
+  }
+  @media(max-width:560px){
+    .overview-grid{grid-template-columns:1fr;}
+    .hero{padding:80px 0 60px;}
+    section{padding:64px 0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand">
+      <span class="dot"></span>
+      <span>CREAO</span>
+      <span class="tag">/ Discord Bot Guide</span>
+    </a>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#steps">Steps</a>
+      <a href="#prompt">Prompt</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="nav-cta" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Start Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow"><span class="pulse"></span> Zero-to-deployed · No prior coding required</span>
+    <h1>Build a Discord Bot with <span class="mono">CREAO</span>, then ship it to GitHub & Railway.</h1>
+    <p class="sub">A complete, plain-English walkthrough. You describe the bot, CREAO's Super Agent writes the code, you push it to GitHub and deploy it live on Railway — all in one session.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">
+        Create your CREAO account →
+      </a>
+      <a class="btn btn-ghost" href="#prompt">Get the prompt template</a>
+    </div>
+    <div class="hero-meta">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg> Free to start</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg> ~45 minutes end to end</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round"/></svg> 6 clear steps</span>
+    </div>
+  </div>
+</header>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">THE PATH</div>
+      <h2>Six steps from idea to live bot.</h2>
+      <p>Every step is clickable. You can run this whole guide in a single afternoon.</p>
+    </div>
+    <div class="overview-grid">
+      <div class="ov-card"><div class="n">01</div><h3>Create CREAO account</h3><p>Sign up free and open the Super Agent chat.</p></div>
+      <div class="ov-card"><div class="n">02</div><h3>Use the prompt</h3><p>Paste the template, describe your bot, get full code.</p></div>
+      <div class="ov-card"><div class="n">03</div><h3>Register Discord app</h3><p>Create a bot, grab the token, invite it to a server.</p></div>
+      <div class="ov-card"><div class="n">04</div><h3>Push to GitHub</h3><p>Create a repo and commit your bot files.</p></div>
+      <div class="ov-card"><div class="n">05</div><h3>Deploy on Railway</h3><p>Connect the repo, add your token, go live.</p></div>
+    </div>
+    <div class="cta-strip" style="margin-top:40px;">
+      <p><b>Don't have a CREAO account yet?</b> It's free and takes 30 seconds.</p>
+      <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Sign up with CREAO →</a>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section id="steps" style="padding-top:40px;">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">STEP BY STEP</div>
+      <h2>The full walkthrough.</h2>
+      <p>Follow these in order. Each step has the exact actions, plus copy-paste commands where you need them.</p>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">01</div>
+        <div class="tag">Create account</div>
+      </div>
+      <div class="step-body">
+        <h3>Create your free CREAO account.</h3>
+        <p>CREAO is the AI agent platform where you build the bot by chatting. There's nothing to install on your machine — everything happens in the browser.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Open <b>agent.creao.ai/@Sonofpeace</b> to sign up through the creator link.</div></div>
+          <div class="li"><span class="chk">2</span><div>Create your account (email or single-click sign-in).</div></div>
+          <div class="li"><span class="chk">3</span><div>From the dashboard, open the <b>Super Agent</b> — this is your main chat workspace.</div></div>
+        </div>
+        <div class="note"><b>Why this link?</b> Signing up through <span class="inline-code">agent.creao.ai/@Sonofpeace</span> supports the creator who wrote this guide. Same free account, same features.</div>
+        <div class="cta-strip">
+          <p>Ready? Create your account now — it's free.</p>
+          <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Open CREAO →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">02</div>
+        <div class="tag">Build the bot</div>
+      </div>
+      <div class="step-body">
+        <h3>Paste the prompt template into the Super Agent.</h3>
+        <p>Copy the prompt from the <a href="#prompt" style="text-decoration:underline;">Prompt Template</a> section below, paste it into your CREAO chat, and fill in the bracketed parts (your bot's name, what it should do). The Super Agent will generate your full bot project — files, dependencies, and a ready-to-run entry point.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Scroll to the <b>Prompt Template</b> section and hit <b>Copy</b>.</div></div>
+          <div class="li"><span class="chk">2</span><div>Paste it into the Super Agent chat and edit the <span class="inline-code">[bracketed]</span> fields.</div></div>
+          <div class="li"><span class="chk">3</span><div>Send the message. CREAO returns <span class="inline-code">index.js</span>, <span class="inline-code">package.json</span>, a <span class="inline-code">.env.example</span>, and a <span class="inline-code">README.md</span>.</div></div>
+          <div class="li"><span class="chk">4</span><div>Download the files (or use the file panel) so you have them locally for the next steps.</div></div>
+        </div>
+        <div class="note"><b>Tip:</b> Keep your chat open. You can ask CREAO to add commands, slash commands, or features later — just keep chatting. The agent remembers your project.</div>
+        <div class="prompt-actions">
+          <a class="btn btn-ghost" href="#prompt">Jump to the prompt →</a>
+          <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Open CREAO chat →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">03</div>
+        <div class="tag">Discord app</div>
+      </div>
+      <div class="step-body">
+        <h3>Register your bot on the Discord Developer Portal.</h3>
+        <p>This is where Discord gives your bot its identity (a token) and an invite link so it can join a server.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Go to <b>discord.com/developers/applications</b> and click <b>New Application</b>. Name it.</div></div>
+          <div class="li"><span class="chk">2</span><div>Open the <b>Bot</b> tab and click <b>Add Bot</b>. Copy the <b>Token</b> — keep it secret, you'll need it next.</div></div>
+          <div class="li"><span class="chk">3</span><div>Under <b>Privileged Gateway Intents</b>, enable <b>Message Content Intent</b> (and Server Members if your bot needs it).</div></div>
+          <div class="li"><span class="chk">4</span><div>Open the <b>OAuth2 → URL Generator</b>, pick scopes (<span class="inline-code">bot</span>, <span class="inline-code">applications.commands</span>) and the permissions your bot needs, then open the generated URL to invite the bot to your server.</div></div>
+        </div>
+        <div class="note"><b>Security:</b> Never commit your token to GitHub. You'll pass it to Railway as an environment variable instead.</div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">04</div>
+        <div class="tag">GitHub</div>
+      </div>
+      <div class="step-body">
+        <h3>Push your bot to a GitHub repository.</h3>
+        <p>Railway will deploy directly from this repo, so get your code up here first.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Create a new repo on <b>github.com/new</b> (name it, e.g. <span class="inline-code">my-discord-bot</span>).</div></div>
+          <div class="li"><span class="chk">2</span><div>Put the files CREAO generated into a folder on your computer.</div></div>
+          <div class="li"><span class="chk">3</span><div>Make sure <span class="inline-code">.gitignore</span> includes <span class="inline-code">.env</span> and <span class="inline-code">node_modules/</span> so secrets never get committed.</div></div>
+          <div class="li"><span class="chk">4</span><div>Commit and push, or just drag-and-drop the files into GitHub's web uploader.</div></div>
+        </div>
+        <pre class="code"><button class="copy-btn" onclick="copyCode(this)">COPY</button><code># from your bot folder
+git init
+git add .
+git commit -m "Discord bot from CREAO"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/my-discord-bot.git
+git push -u origin main</code></pre>
+        <div class="note"><b>Prefer no terminal?</b> Use GitHub Desktop, or upload files directly on the GitHub website. The terminal commands above are optional.</div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">05</div>
+        <div class="tag">Railway</div>
+      </div>
+      <div class="step-body">
+        <h3>Deploy live on Railway.</h3>
+        <p>Railway reads your GitHub repo, installs dependencies, and runs your bot 24/7 in the cloud. You only configure it once.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Go to <b>railway.app</b>, sign in with GitHub, and click <b>New Project → Deploy from GitHub repo</b>.</div></div>
+          <div class="li"><span class="chk">2</span><div>Select the repo you just pushed.</div></div>
+          <div class="li"><span class="chk">3</span><div>Open the project <b>Variables</b> tab and add <span class="inline-code">DISCORD_TOKEN</span> with the token from Step 03.</div></div>
+          <div class="li"><span class="chk">4</span><div>Railway auto-detects Node.js from <span class="inline-code">package.json</span> and runs your start script. Check the <b>Deployments</b> tab — when it says <b>Active</b>, your bot is online.</div></div>
+        </div>
+        <div class="note"><b>Your bot needs a start command.</b> Make sure <span class="inline-code">package.json</span> has <span class="inline-code">"start": "node index.js"</span> in its <span class="inline-code">scripts</span>. The CREAO prompt below already includes this.</div>
+        <pre class="code"><button class="copy-btn" onclick="copyCode(this)">COPY</button><code># Example package.json scripts the prompt generates
+"scripts": {
+  "start": "node index.js"
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step">
+      <div class="step-label">
+        <div class="big">06</div>
+        <div class="tag">Verify</div>
+      </div>
+      <div class="step-body">
+        <h3>Test it and iterate.</h3>
+        <p>Your bot is live. Now confirm it works, then keep building by chatting with CREAO.</p>
+        <div class="list">
+          <div class="li"><span class="chk">1</span><div>Go to your Discord server and type your bot's command (e.g. <span class="inline-code">!ping</span> or a slash command). It should respond.</div></div>
+          <div class="li"><span class="chk">2</span><div>Check Railway <b>Logs</b> if nothing happens — the token or intents are the usual culprits.</div></div>
+          <div class="li"><span class="chk">3</span><div>Want a new feature? Ask CREAO in the same chat. It updates the files — push the changes to GitHub and Railway auto-redeploys.</div></div>
+        </div>
+        <div class="cta-strip">
+          <p><b>That's the loop:</b> chat with CREAO → push to GitHub → Railway ships it. Repeat forever.</p>
+          <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Open CREAO & build →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROMPT TEMPLATE -->
+<section id="prompt">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">THE PROMPT</div>
+      <h2>Copy this into CREAO to build your bot.</h2>
+      <p>This is the template. Paste it into the Super Agent, edit the <span class="inline-code">[bracketed]</span> fields to describe your bot, and send. CREAO writes the full project.</p>
+    </div>
+
+    <div class="prompt-wrap">
+      <div class="prompt-card">
+        <div class="prompt-head">
+          <div class="label">
+            <span class="dots"><i></i><i></i><i></i></span>
+            CREAO · Discord Bot Builder Prompt
+          </div>
+          <button class="copy-btn" onclick="copyPrompt(this)">COPY PROMPT</button>
+        </div>
+        <div class="prompt-body">
+<pre id="promptText">Build me a complete, production-ready Discord bot using discord.js (Node.js, latest v14). I will deploy it on Railway from a GitHub repo, so it must be deploy-ready.
+
+== BOT SPEC ==
+- Bot name: [My Bot Name]
+- Prefix for text commands: [!]
+- What the bot does: [describe what your bot should do — e.g. a moderation bot with kick/ban/warn commands, a welcome bot that greets new members, a FAQ bot, a leveling bot, etc.]
+- Features I want:
+  1. [feature one — e.g. !ping replies with latency]
+  2. [feature two — e.g. slash command /hello that says hello to the user]
+  3. [feature three — e.g. welcome message in a system channel when a member joins]
+  4. [add more or remove as needed]
+
+== TECHNICAL REQUIREMENTS ==
+- Use discord.js v14 and Node.js 18+.
+- Implement BOTH classic prefix commands AND slash commands (register slash commands on the ready event).
+- Read the token from process.env.DISCORD_TOKEN (never hardcode it).
+- Enable required intents: Guilds, GuildMessages, MessageContent, GuildMembers.
+- Structure the project cleanly:
+    /index.js          (entry point — logs in, registers slash commands, listens to events)
+    /package.json      (with "start": "node index.js", discord.js as dependency, "type": "module" or commonjs — your call, just make it consistent)
+    /.env.example      (lists DISCORD_TOKEN and any other vars, no real values)
+    /.gitignore        (ignores node_modules/ and .env)
+    /README.md        (setup steps: install deps, add token to .env locally, invite bot, run npm start, and how to deploy on Railway)
+- Add clear comments explaining each section so I can learn and extend it.
+- Include basic error handling so the bot stays online (try/catch around command execution, handle DiscordAPIError).
+
+== DELIVERABLES ==
+Give me each file with its filename as a heading, fully written and ready to save. Then give me a short "How to run locally" section and a "How to deploy to Railway" section. Keep everything copy-paste ready.</pre>
+        </div>
+      </div>
+
+      <div class="prompt-actions">
+        <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Open CREAO & paste this →</a>
+        <button class="btn btn-ghost" onclick="copyPromptFromHidden()">📋 Copy prompt to clipboard</button>
+      </div>
+
+      <div class="note" style="margin-top:30px;border-left:2px solid #fff;padding:14px 20px;background:#141414;border-radius:0 8px 8px 0;font-size:14px;color:#cfcfcf;">
+        <b>How to use it:</b> 1) Copy the prompt. 2) Sign in to CREAO and open the Super Agent. 3) Paste, edit the bracketed fields to match your bot idea, and send. 4) Save the files it gives you and continue to Step 03 above.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-num">FAQ</div>
+      <h2>Questions before you start?</h2>
+    </div>
+    <div class="faq">
+      <details class="faq-item">
+        <summary>Do I need to know how to code? <span class="plus">+</span></summary>
+        <div class="ans">No. The Super Agent writes the code from your description. You copy the files to GitHub and connect Railway — both have web interfaces. The terminal commands are optional shortcuts.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Is CREAO free? <span class="plus">+</span></summary>
+        <div class="ans">You can start free and build your bot in one session. Paid plans unlock more runs and heavier usage. Sign up through <a href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener" style="text-decoration:underline;">agent.creao.ai/@Sonofpeace</a>.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Is Railway free? <span class="plus">+</span></summary>
+        <div class="ans">Railway offers a free trial/hobby credit to start. A small always-on Discord bot typically costs a couple of dollars per month. You can pause the deployment any time.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What if my bot doesn't respond? <span class="plus">+</span></summary>
+        <div class="ans">The most common causes: the DISCORD_TOKEN variable isn't set in Railway, the Message Content Intent isn't enabled in the Discord Developer Portal, or the bot lacks permissions in the server. Check Railway's Logs tab for the exact error.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Can I add more features later? <span class="plus">+</span></summary>
+        <div class="ans">Yes. Keep chatting with the Super Agent in CREAO — it remembers your project and updates the files. Push the new code to GitHub and Railway redeploys automatically.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Will my token stay safe? <span class="plus">+</span></summary>
+        <div class="ans">Yes, if you follow the guide. The token lives only in Railway's environment variables and your local <span style="font-family:monospace;">.env</span> (which is gitignored). Never paste it into chat or commit it.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Your Discord bot is one chat away.</h2>
+    <p>Open CREAO, paste the prompt, and you'll have a live bot before lunch. Free to start.</p>
+    <a class="btn btn-primary" href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">Sign up with CREAO →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot-inner">
+    <div>© 2026 · Discord Bot Build Guide · Built with CREAO</div>
+    <div>
+      <a href="https://agent.creao.ai/@Sonofpeace" target="_blank" rel="noopener">agent.creao.ai/@Sonofpeace</a>
+      &nbsp;·&nbsp;
+      <a href="#top">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">Copied to clipboard ✓</div>
+
+<script>
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg;
+    t.classList.add('show');
+    clearTimeout(window.__toastT);
+    window.__toastT=setTimeout(()=>t.classList.remove('show'),1800);
+  }
+
+  function copyCode(btn){
+    const code=btn.parentElement.querySelector('code');
+    navigator.clipboard.writeText(code.innerText).then(()=>{
+      btn.textContent='COPIED';btn.classList.add('copied');
+      showToast('Commands copied ✓');
+      setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},1600);
+    });
+  }
+
+  function copyPrompt(btn){
+    const text=document.getElementById('promptText').innerText;
+    navigator.clipboard.writeText(text).then(()=>{
+      btn.textContent='COPIED ✓';btn.classList.add('copied');
+      showToast('Prompt copied — paste it into CREAO ✓');
+      setTimeout(()=>{btn.textContent='COPY PROMPT';btn.classList.remove('copied');},2000);
+    });
+  }
+
+  function copyPromptFromHidden(){
+    const text=document.getElementById('promptText').innerText;
+    navigator.clipboard.writeText(text).then(()=>showToast('Prompt copied — paste it into CREAO ✓'));
+  }
+</script>
+
+</body>
+</html>
